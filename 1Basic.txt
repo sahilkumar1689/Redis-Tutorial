@@ -1,0 +1,36 @@
+Redis = Full form is remote dictionary server.Redis is an open-source, in-memory data structure store that can be used as a database, cache, and message broker. It is known for its high performance and low latency, making it suitable for real-time applications.
+
+Working = Redis acts as a caching layer between the database and the client to speed up data access and reduce the load on the main database. When a client asks for data, the API Gateway firstly forwards the request to Redis,If Redis has the data it returns it quickly through the API Gateway to the client. If the data is missing Redis retrieves it from the database, stores it in the cache for future requests, and then passes it back through the API Gateway to the client. This flow speeds up response times and reduces the database load.
+
+Advantages = High performance due to speed,atomicity.
+Disadvantage = High Memory usage. 
+
+
+Redis Fast Due to following reasons:
+1. In-memory = The main reason Redis is so fast is that it stores all its data in RAM. Unlike traditional databases that read and write data from disks, Redis works entirely in memory, which makes accessing data much faster than from a hard drive or SSD.
+
+2. Single-threaded architecture = Redis follows a simple, single-threaded model for handling commands. This means it uses one thread to handle all requests in an event loop, instead of using multiple threads. By doing this, Redis avoids the overhead and complexity of locking, synchronization, and context switching that usually come with multithreading.
+One more important think is even though redis is single threaded it can handle the thousand of concurrent request,because of using event loop and a technique called I/O mutiplexing,it is a technique by using which more that one tcp connection can be active,which lets it listen to many client connections at once, without blocking or slowing down.
+
+3. Data structure optimization = Redis supports various data structures such as strings, hashes, lists, sets, and sorted sets, all optimized for quick access and manipulation. For example, adding an item to a Redis list is an O(1) operation, meaning it takes constant time no matter the size of the list.
+Redis can process millions of writes per second, making it ideal for high-throughput applications like real-time analytics platforms.
+
+4. Pipelining = Redis supports pipelining, enabling clients to send multiple commands simultaneously, which helps reduce the latency caused by round-trip communication
+
+5. Built-In Replication and Clustering = To ensure scalability, Redis provides built-in replication and clustering support. This enables Redis to manage larger datasets and handle more operations by distributing the workload across multiple nodes.
+
+
+Redis persistance mechanism = Redis support persistance of data using two mechanism:
+1. RDB snapshot = In this,redis create the periodic snapshots of the database and store in the disk storage inside the dump.rdb file.
+e.g.:
+If 1 change in 900 sec → save snapshot
+If 10 changes in 300 sec → save snapshot
+
+If Redis stops before snapshot, data is lost.
+
+2. AOF,Append Only File = In this,redis write every command inside the appendfsync.aof file and that file also stored in the disk.
+Generally, we have three configuration in order to creting the aof files:
+1. CONFIG GET appendfsync no = In this the os decide when to write the commands in the aof file.Possible data lose.
+2. CONFIG GET appendfsync everysec = In this,redis write command in the aof file every second.One second data lose but recommended.
+3. CONFIG GET appendfsync always = In this,every command immediately write in the aof file,no data lose but slower.
+
