@@ -1,0 +1,202 @@
+1. Difference between redis and traditional sql databases?
+
+Feature	    | Redis	            | Traditional RDBMS
+Storage	    | In-memory	        | Disk first
+Query	    | Simple commands	| SQL queries
+ACID	    | Limited	        | Strong transactional guarantees
+Use cases	| Caching, pub/sub	| Complex data modeling
+Speed	    | Extremely high	| Moderate
+
+
+2. What are Redis hashes?
+Redis Hashes are a data structure that stores data as field-value pairs under a single key. They are commonly used to represent objects and are memory-efficient for storing related information.
+Example: A user profile can be stored as a Redis hash with fields like name, email, and age under a single key such as user:101.
+
+
+3. how does it handle concurrency even with single thread?
+Although Redis processes commands using a single-threaded execution model, it efficiently handles multiple client requests through non-blocking I/O multiplexing and atomic operations.Uses non-blocking I/O to handle thousands of concurrent client connections efficiently.
+Redis is fundamentally single-threaded for command execution, which means it processes one command at a time in a sequential order. This architectural decision eliminates race conditions and makes most Redis operations atomic by design
+
+
+4. What is pub/sub in Redis?
+Pub/Sub (Publish/Subscribe) is a messaging pattern in Redis where publishers send messages to channels, and all subscribers receive that message who Subscribed to that channels. It is commonly used for real-time communication.
+
+
+5. How do you ensure persistence in Redis?
+Redis provides two persistence mechanisms: RDB (Redis Database Backup) and AOF (Append Only File). RDB creates periodic snapshots of the data, while AOF logs every write operation, allowing the database to be restored after a restart.
+1. RDB offers faster backups and recovery but may lose recent data since the last snapshot.
+2. AOF provides higher durability by recording every write operation, though it consumes more storage and may be slightly slower.
+Choosing between them often depends on how much data loss is acceptable if Redis unexpectedly crashes — snap-based persistence may lose recent writes, whereas AOF minimizes that loss.
+
+
+6. Explain the concept of Redis transactions.
+Redis Transactions allow multiple commands to be executed as a single unit using the MULTI and EXEC commands. This ensures that all queued commands are executed sequentially without interruption from other clients.
+It Uses commands such as MULTI, EXEC, DISCARD, and WATCH to manage transactions.
+Ensures atomic execution of grouped commands, maintaining data consistency.
+Example: A banking application can use a Redis transaction to debit one account and credit another, ensuring both operations are executed together.
+
+
+7. How can you scale Redis?
+Redis can be scaled using replication, Redis Sentinel, and Redis Cluster. Replication improves read performance, Sentinel provides high availability, and Redis Cluster distributes data across multiple nodes for horizontal scaling.
+
+1. Redis Cluster is a distributed deployment mode that automatically partitions (shards) data across multiple Redis nodes. It improves horizontal scalability, performance, and high availability by distributing the workload.This allows a single logical Redis database to be spread across many machines.
+Example: A video streaming platform can use Redis Cluster to distribute millions of user sessions across multiple Redis nodes, ensuring fast access and high availability.
+
+2. Redis supports master-replica replication, where one server (master) writes data and one or more replicas asynchronously copy it. Replication enhances read scalability, improves fault tolerance, and supports failover scenarios: if the master fails, a replica can be promoted to master. This setup is crucial for distributed and highly available systems where continuous uptime and load distribution are needed.
+
+3. Redis Sentinel is a monitoring and failover system designed to manage Redis master-replica setups. It continuously checks the health of Redis instances and detects failures automatically. When the master becomes unreachable, Sentinel coordinates a leader election among replicas and promotes one replica to become the new master.
+Sentinel also updates client configurations so applications automatically connect to the new master without manual intervention. This mechanism provides fault detection, automatic failover, and configuration management, making it ideal for systems that require high availability without the complexity of Redis Cluster..
+
+
+8. Explain how Redis uses keys? What are eviction policies in Redis and when are they used?
+Keys are unique identifiers used to store and retrieve data in Redis. Every value in Redis is associated with a key, regardless of the underlying data type.
+Eviction policies determine how Redis behaves when memory limits are reached. Policies include:
+
+1. noeviction – Return errors when memory is full
+2. allkeys-lru – Evict least recently used keys globally
+3. volatile-ttl – Evict keys with the shortest TTL
+4. allkeys-random – Evict random keys
+These policies are important in caching scenarios where memory constraints exist, and certain keys should be prioritized over others.
+
+
+9. How does Redis manage memory?
+Redis manages memory by storing data in RAM using optimized data structures and memory allocators such as jemalloc. It also provides memory limits and eviction policies to efficiently control memory usage.
+
+Uses memory allocators and optimized data structures to reduce memory overhead.
+Supports maxmemory and eviction policies to automatically manage memory when the limit is reached.
+Example: A social media application can configure a memory limit and use the allkeys-lru eviction policy so that the least recently accessed cached data is removed when memory becomes full.
+
+
+10. Describe a scenario where Redis is not the appropriate choice.
+Redis is not the best choice for applications that require complex relational queries, ACID transactions, or datasets larger than the available memory. In such cases, a disk-based relational database like MySQL or PostgreSQL is more suitable.
+Example: A banking system that stores financial transactions and requires ACID compliance is better suited for MySQL or PostgreSQL rather than Redis.
+
+
+11. How can you monitor and debug Redis performance issues?
+Redis provides built-in monitoring and debugging tools such as MONITOR, SLOWLOG, and INFO to analyze performance and identify bottlenecks. External monitoring tools like Prometheus and Grafana can also be used for real-time metrics and visualization.
+
+
+12. What security features does Redis offer?
+Redis provides security features such as authentication, access control, encrypted connections, and command restrictions to protect data and prevent unauthorized access. It is recommended to deploy Redis within a trusted network for enhanced security.
+Supports password authentication (ACLs/requirepass), SSL/TLS encryption, and Access Control Lists (ACLs)
+
+
+13. Explain how Lua scripting is used in Redis.
+Redis supports Lua scripting, which allows developers to execute complex logic directly on the Redis server. Lua scripts run atomically, meaning no other commands can interleave during execution. This ensures consistency while reducing round-trip communication between client and server.
+A common example is checking a value and updating it conditionally in a single script. Without Lua, this might require multiple commands and risk race conditions.
+
+
+14. What are Redis pipelines and why are they used?
+Redis pipelines allow clients to send multiple commands in a single network round trip without waiting for individual responses. This dramatically reduces network latency and improves throughput, especially in high-volume scenarios.
+
+For example, inserting 10,000 keys one by one would incur 10,000 network round trips. With pipelining, all commands are sent together, and responses are read in bulk. Pipelines do not guarantee atomicity, but they significantly enhance performance in batch operations
+
+
+15. Explain the Redis lifecycle from startup to shutdown.
+The Redis lifecycle begins with server startup, during which Redis loads configuration files and initializes memory. If persistence is enabled, Redis restores data from either RDB snapshots or the AOF file, depending on configuration priority. Once data is loaded into memory, Redis starts listening for client connections and processes commands in real time.
+
+During normal operation, Redis handles read and write requests, manages TTL expiration, and optionally persists data in the background. On shutdown, Redis attempts a graceful termination by flushing data to disk if configured, closing client connections, and freeing memory
+
+
+16. What are Redis Modules, and how do they enhance functionality?
+Redis Modules are extensions that add new features and capabilities to Redis without modifying its core. They enable Redis to support advanced use cases such as full-text search, JSON storage, graph processing, and time-series data.
+
+Popular modules include RediSearch, RedisJSON, RedisGraph, and RedisTimeSeries.
+Extend Redis beyond basic key-value storage, making it suitable for more complex applications.
+Example: An e-commerce application can use RediSearch to provide fast product search and RedisJSON to efficiently store and query product details in JSON format.
+
+
+17. How do you optimize Redis for high read volumes?
+Redis can be optimized for high read volumes by using replication, read replicas, and efficient caching strategies. Read replicas distribute read requests, reducing the load on the primary server.
+
+Read replicas handle read traffic, improving scalability and reducing the load on the primary node.
+Use Redis Cluster and efficient caching policies to further improve read performance.
+Example: A social media platform can route user profile and feed requests to Redis read replicas, while the primary server handles write operations such as new posts and comments.
+
+
+18. What Is the Difference Between Redis and Memcached?
+Redis and Memcached are both in-memory data stores used for caching, but Redis supports multiple data structures and persistence, while Memcached is a simple key-value cache focused on speed.
+Redis supports data structures like Hashes, Lists, Sets, and Sorted Sets, whereas Memcached supports only simple key-value pairs.
+Redis offers features such as persistence, replication, Pub/Sub, and clustering, while Memcached is mainly used for basic caching.
+
+
+19. What Is the TTL (Time To Live) Feature in Redis?
+TTL (Time To Live) is a Redis feature that automatically removes a key after a specified period. It is commonly used to manage temporary data such as caches, sessions, and authentication tokens.
+Set an expiration time for keys using commands like EXPIRE or SETEX.
+
+These Redis commands are used to set and check the expiration time of keys. EXPIRE and PEXPIRE set the lifetime of a key, while TTL and PTTL return the remaining time before the key expires.
+EXPIRE sets expiration in seconds, PEXPIRE sets expiration in milliseconds.
+TTL returns the remaining time in seconds, while PTTL returns it in milliseconds.
+
+
+20. What Are Cache Hit and Cache Miss in Redis?
+A Cache Hit occurs when the requested data is found in the Redis cache, while a Cache Miss occurs when the data is not available in the cache and must be fetched from the database.
+What Is Cache Invalidation = 
+Cache invalidation is the process of removing or updating outdated data in the Redis cache to ensure users always receive the latest information. It helps maintain data consistency between the cache and the database.
+
+
+21. Explain Different Cache Strategies Used with Redis.
+Redis supports multiple caching strategies to balance performance, consistency, and database load. The choice of strategy depends on the application's read/write patterns and consistency requirements.
+
+1. Cache-Aside = Cache-Aside, also called Lazy Loading, is one of the most widely used caching strategies. The application manages the cache explicitly.
+1. Suppose a user requests product 123. The application first checks the cache.
+2. If the product is there, that's a cache hit, and we return it immediately.
+3. If it is not there, that's a cache miss. The application queries the database, gets the product, stores it in the cache, and then returns it to the user.
+
+2. Reads and Writes with cache-aside = Suppose product 123 is already cached, and someone changes its price in the database. If we update only the database, the cached version still contains the old price. Now the cache is stale.
+A common approach is to update the database and then delete the corresponding cache entry. The next read becomes a cache miss, fetches the latest value from the database, and repopulates the cache.
+
+3. Read-Through = This is looks similar to Cache-Aside from the outside, but the responsibility is different.
+With Read-Through, the application talks to the cache as if the cache were the main data access layer.
+
+Suppose the application requests product 123.
+1. If the value is already cached, the cache returns it.
+2. If the value is missing, the cache itself retrieves the value from the database, stores it, and returns it to the application.
+3. So the application does not need to implement the cache-miss logic directly. From the application's perspective, it simply asks the cache for the data.
+
+4. Write-Through = With Write-Through caching, every write goes through the cache.
+
+Suppose a user updates the price of a product.
+
+1. The application writes the new value to the cache.
+2. The cache then writes that value to the database as part of the same operation.
+3. The write is considered successful only after the database has also been updated.
+
+5. Write-Behind = Write-Behind, sometimes called Write-Back caching, takes a different approach.
+Instead of updating the database immediately, the application writes to the cache first. The cache acknowledges the write quickly. The database update happens asynchronously later.
+
+For example, suppose we update a counter. The new value is written to the cache immediately. Instead of waiting for the database, the request can finish. The cache may then batch many updates together and write them to the database in the background.
+This can significantly improve write performance because the application is no longer waiting for the database on every request. It can also reduce database load by combining multiple writes.
+
+6. Refresh-Ahead Cache = Scheduled refresh cache before it expires to missing or stale data.
+
+
+Caching types:
+
+1. Client Cache: Stores cart items and user preferences.
+2. CDN Cache: Holds product images, CSS, and JS files.
+3. Load Balancer Cache: Saves popular API responses.
+4. Application Cache: Stores product details, prices, and reviews.
+5. Database Cache: Caches frequent product category queries.
+
+
+
+22. What Is Consistent Hashing, and Why Is It Used with Redis?
+Consistent Hashing is a technique for distributing data across multiple Redis nodes while minimizing data movement when nodes are added or removed. It helps maintain balanced data distribution and improves scalability.
+1.Evenly distributes keys across Redis nodes, preventing hotspots and load imbalance.
+2.Minimizes key redistribution when scaling the cluster, reducing cache misses and improving availability.
+Example: A large e-commerce platform can use consistent hashing to distribute cached product data across multiple Redis servers. When a new server is added, only a small portion of the keys are reassigned instead of redistributing the entire dataset.
+
+
+23. What Is a Distributed Lock in Redis, and How Does Redlock Work?
+A Distributed Lock in Redis ensures that only one client or process can access a shared resource at a time in a distributed system. Redlock is a distributed locking algorithm that acquires locks across multiple Redis instances to improve reliability and fault tolerance.
+1.Prevents multiple clients from modifying the same resource simultaneously, avoiding data inconsistencies.
+2.Redlock acquires locks on multiple Redis nodes and grants the lock only if a majority of nodes agree.
+Example: An online ticket booking system uses a Redis distributed lock to ensure that only one user can reserve the last available seat at a time, preventing duplicate bookings.
+
+24. What Is a Cache Stampede, and How Can Redis Prevent It?
+A Cache Stampede occurs when multiple requests try to fetch the same expired data simultaneously, causing a sudden surge of database queries. Redis helps prevent this by using techniques that reduce concurrent cache misses.
+
+
+25. Redis Streams are a data structure designed to store and process continuous streams of data. They are commonly used for event-driven applications, message queues, and real-time data processing.
+Example: A food delivery application can use Redis Streams to process order events, where multiple services (payment, delivery, and notification) consume the same stream independently.

@@ -1,4 +1,6 @@
 Redis = Full form is remote dictionary server.Redis is an open-source, in-memory data structure store that can be used as a database, cache, and message broker. It is known for its high performance and low latency, making it suitable for real-time applications.
+Example: A shopping website can use Redis to cache frequently viewed products so users receive faster responses instead of querying the database every time.
+
 
 Working = Redis acts as a caching layer between the database and the client to speed up data access and reduce the load on the main database. When a client asks for data, the API Gateway firstly forwards the request to Redis,If Redis has the data it returns it quickly through the API Gateway to the client. If the data is missing Redis retrieves it from the database, stores it in the cache for future requests, and then passes it back through the API Gateway to the client. This flow speeds up response times and reduces the database load.
 
